@@ -30,7 +30,7 @@ public class Main {
             Dao.cleanUsersTable();
             Dao.dropUsersTable();
         } finally {
-            Util.closer();
+            Util.connect().close();
         }
     }
 }
