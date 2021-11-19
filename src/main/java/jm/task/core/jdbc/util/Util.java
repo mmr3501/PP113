@@ -22,6 +22,15 @@ public class Util {
             System.out.println("Соединение с БД не установлено");
         }
     }
+    public static void closer() throws SQLException {
+        try {
+            getStatement().close();
+            getConnect().close();
+            System.out.println("Соединение закрыто");
+        } catch (SQLException e) {
+            System.out.println("Проблемы с закрытием соединения");
+        }
+    }
 
     public static Connection getConnect() {
         return connection;

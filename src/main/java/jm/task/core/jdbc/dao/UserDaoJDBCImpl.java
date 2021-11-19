@@ -13,15 +13,15 @@ public class UserDaoJDBCImpl implements UserDao {
 
     }
 
-    public void createUsersTable() throws SQLException {
+    public void createUsersTable() {
         try {
-            String SQL = "CREATE TABLE users " +
+            Util.connect();
+            Util.getStatement().executeUpdate("CREATE TABLE IF NOT EXISTS users " +
                     "(id BIGINT not NULL AUTO_INCREMENT, " +
                     " name VARCHAR(50) not NULL, " +
                     " lastname VARCHAR (50) not NULL, " +
                     " age TINYINT not NULL, " +
-                    " PRIMARY KEY (id))";
-            Util.getStatement().execute(SQL);
+                    " PRIMARY KEY (id))");
             System.out.println("Таблица создана");
         } catch (SQLException e) {
             System.out.println("Таблица не создана");
@@ -30,7 +30,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void dropUsersTable() {
         try {
-            Util.getStatement().execute("DROP TABLE `mydbtest`.`users`;");
+            Util.getStatement().executeUpdate("DROP TABLE IF EXISTS `mydbtest`.`users`;");
             System.out.println("Таблица удалена");
         } catch (SQLException e) {
             System.out.println("Таблица не удалена");
@@ -43,7 +43,7 @@ public class UserDaoJDBCImpl implements UserDao {
         System.out.format("User с именем – %s добавлен в базу данных\n", name);
     }
 
-    public void removeUserById(long id) throws SQLException {
+    public void removeUserById(long id) {
         String nabor = "DELETE FROM users WHERE ID = " + id;
         System.out.format("User с id – %s удален из базы данных\n", id);
         try {
@@ -55,7 +55,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public List<User> getAllUsers() throws SQLException {
         List <User> list = new ArrayList<>();
-        ResultSet resultSet = Util.getStatement().executeQuery("select * from users");
+        ResultSet resultSet = Util.getStatement().executeQuery("SELECT * FROM users");
         while (resultSet.next()) {
             User user = new User();
             user.setId(resultSet.getLong(1));
@@ -67,7 +67,7 @@ public class UserDaoJDBCImpl implements UserDao {
         return list;
     }
 
-    public void cleanUsersTable() throws SQLException {
+    public void cleanUsersTable() {
         try {
             Util.getStatement().execute("TRUNCATE `mydbtest`.`users`;");
             System.out.println("Таблица очищена");
