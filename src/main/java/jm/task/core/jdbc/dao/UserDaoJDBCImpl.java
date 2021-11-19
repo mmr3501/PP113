@@ -2,9 +2,9 @@ package jm.task.core.jdbc.dao;
 
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,8 +15,8 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void createUsersTable() {
-        try {
-            Util.connect().createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS users " +
+        try (Statement statement = Util.connect().createStatement()) {
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS users " +
                     "(id BIGINT not NULL AUTO_INCREMENT, " +
                     " name VARCHAR(50) not NULL, " +
                     " lastname VARCHAR (50) not NULL, " +
@@ -29,49 +29,64 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void dropUsersTable() {
-        try {
-            Util.connect().createStatement().executeUpdate("DROP TABLE IF EXISTS `mydbtest`.`users`;");
+        try (Statement statement = Util.connect().createStatement()) {
+            statement.executeUpdate("DROP TABLE IF EXISTS `mydbtest`.`users`;");
             System.out.println("Таблица удалена");
         } catch (SQLException e) {
             System.out.println("Таблица не удалена");
+            e.printStackTrace();
         }
     }
 
-    public void saveUser(String name, String lastName, byte age) throws SQLException {
+
+    public void saveUser(String name, String lastName, byte age) {
         String nabor = "values('" + name +"', " + "'" + lastName + "', " + age + ");";
-        Util.connect().createStatement().execute("insert into users (name, lastname, age) " + nabor);
-        System.out.format("User с именем – %s добавлен в базу данных\n", name);
+        try (Statement statement = Util.connect().createStatement()) {
+            statement.execute("insert into users (name, lastname, age) " + nabor);
+            System.out.format("User с именем – %s добавлен в базу данных\n", name);
+        } catch (SQLException e) {
+            System.out.println("Ошибка создания юзера");
+            e.printStackTrace();
+        }
     }
 
     public void removeUserById(long id) {
         System.out.format("User с id – %s удален из базы данных\n", id);
-        try {
-            Util.connect().createStatement().execute("DELETE FROM users WHERE ID = " + id);
+        try (Statement statement = Util.connect().createStatement()) {
+            statement.execute("DELETE FROM users WHERE ID = " + id);
         } catch (SQLException e) {
             System.out.format("User с id – %s не удален из базы данных\n", id);
+            e.printStackTrace();
         }
     }
 
-    public List<User> getAllUsers() throws SQLException {
+    public List<User> getAllUsers() {
         List <User> list = new ArrayList<>();
-        ResultSet resultSet = Util.connect().createStatement().executeQuery("SELECT * FROM users");
-        while (resultSet.next()) {
-            User user = new User();
-            user.setId(resultSet.getLong(1));
-            user.setName(resultSet.getString(2));
-            user.setLastName(resultSet.getString(3));
-            user.setAge(resultSet.getByte(4));
-            list.add(user);
+        try (Statement statement = Util.connect().createStatement()) {
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM users");
+            while (resultSet.next()) {
+                User user = new User();
+                user.setId(resultSet.getLong(1));
+                user.setName(resultSet.getString(2));
+                user.setLastName(resultSet.getString(3));
+                user.setAge(resultSet.getByte(4));
+                list.add(user);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return list;
     }
 
     public void cleanUsersTable() {
         try {
-            Util.connect().createStatement().execute("TRUNCATE `mydbtest`.`users`;");
+            try (Statement statement = Util.connect().createStatement()) {
+                statement.execute("TRUNCATE `mydbtest`.`users`;");
+            }
             System.out.println("Таблица очищена");
         } catch (SQLException e) {
             System.out.println("Таблица не очищена");
+            e.printStackTrace();
         }
     }
 }
