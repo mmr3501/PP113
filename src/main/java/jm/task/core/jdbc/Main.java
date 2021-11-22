@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        try (SessionFactory sf = Util.hibernateConnect()) {
+        try {
             UserDaoHibernateImpl dao = new UserDaoHibernateImpl();
             dao.createUsersTable();
             dao.saveUser("Ivan", "Ivanov", (byte) 10);
